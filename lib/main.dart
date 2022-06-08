@@ -1,7 +1,19 @@
+import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
+import 'package:pwdmanls/db.dart';
+import 'package:pwdmanls/main_screen.dart';
+import 'package:pwdmanls/set_password.dart';
+import 'package:provider/provider.dart';
 
+late MyDatabase database;
 void main() {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(Provider<MyDatabase>(
+      create: (context) => MyDatabase(),
+      child: const MyApp(),
+      dispose: (context, db) => db.close(),
+   ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -11,7 +23,16 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      initialRoute: '/',
+      routes: {
+        // When navigating to the "/" route, build the FirstScreen widget.
+        '/': (context) => const MyHomePage(title: 'PwdManagerls'),
+        // When navigating to the "/second" route, build the SecondScreen widget.
+        '/second': (context) => const MainScreen(),
+        '/set': (context) => const SetPassword(),
+        // '/get': (context) => const MainScreen(),
+      },
+      title: 'PwdManls',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -24,7 +45,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      // home: const MyHomePage(title: 'PwdManagerls'),
     );
   }
 }
@@ -48,18 +69,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
+  bool _passwordVisible = true;
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -71,45 +83,109 @@ class _MyHomePageState extends State<MyHomePage> {
     // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
+        centerTitle: true,
         title: Text(widget.title),
       ),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+            loginRegline(_emailController, "אימייל"),
+            const SizedBox(height: 15),
+            loginReglinePassword(_passwordController, "סיסמא"),
+            const SizedBox(
+              height: 30,
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
+            loginButton(),
+            const SizedBox(height: 15),
+            // registerButton(),
+            // const SizedBox(height: 15),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+
+  Widget loginRegline(TextEditingController controller, String title) {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width * 0.7,
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: TextField(
+          key: const Key("Email"),
+          maxLength: 45,
+          textAlignVertical: TextAlignVertical.center,
+          controller: controller,
+          autofocus: false,
+          decoration: InputDecoration(
+            counterText: "",
+            border: const OutlineInputBorder(),
+            labelText: title,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget loginButton() {
+    return ElevatedButton(
+        key: const Key("LoginButton"),
+        style: ElevatedButton.styleFrom(
+            minimumSize: Size(MediaQuery.of(context).size.width / 2, 50),
+            primary: Colors.green,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14.0),
+            )),
+        onPressed: () async {
+          Navigator.pushNamed(context, '/second');
+          // final String email = _emailController.text.trim();
+          // final String password = _passwordController.text.trim();
+          // if (email.isNotEmpty && password.isNotEmpty) {
+          //   context.read<AuthService>().login(email, password).then((value) {
+          //     if (value != "Logged In") {
+          //       showDialogMsg(
+          //           context, MsgType.error, "שם משתמש או סיסמא לא נכונים");
+          //     }
+          //   });
+          // } else {
+          //   if (email.isEmpty) {
+          //     showDialogMsg(context, MsgType.error, "אימייל לא תקין");
+          //   } else {
+          //     showDialogMsg(context, MsgType.error, "סיסמה לא תקינה");
+          //   }
+          // }
+        },
+        child: const Text('התחבר'));
+  }
+
+  Widget loginReglinePassword(TextEditingController controller, String title) {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width * 0.7,
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: TextField(
+          maxLength: 45,
+          textAlignVertical: TextAlignVertical.center,
+          controller: controller,
+          autofocus: false,
+          obscureText: _passwordVisible,
+          decoration: InputDecoration(
+              border: const OutlineInputBorder(),
+              labelText: title,
+              counterText: "",
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _passwordVisible ? Icons.visibility : Icons.visibility_off,
+                  color: Colors.blue,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _passwordVisible = !_passwordVisible;
+                  });
+                },
+              )),
+        ),
+      ),
     );
   }
 }
