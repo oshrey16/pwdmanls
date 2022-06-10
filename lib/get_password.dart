@@ -17,7 +17,7 @@ class GetPasswordPage extends StatefulWidget {
 }
 
 class _GetPasswordPageState extends State<GetPasswordPage> {
-  final List<passwordStruct> passwords = [];
+  final List<PasswordStruct> passwords = [];
 
   @override
   Widget build(BuildContext context) {
@@ -121,8 +121,8 @@ class _GetPasswordPageState extends State<GetPasswordPage> {
     database.getDataSet().then((value) {
       for (var v in value) {
         Decrypt(v.password).then((value) {
-          passwordStruct p =
-              passwordStruct(v.id, v.title, v.email, v.password, v.url);
+          PasswordStruct p =
+              PasswordStruct(v.id, v.title, v.email, v.password, v.url);
           passwords.add(p);
         });
       }
