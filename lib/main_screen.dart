@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
@@ -17,7 +18,21 @@ class _MainScreenState extends State<MainScreen> {
         ),
         body: Center(
           child: SingleChildScrollView(
-            child: Column(children: [createButton(),const SizedBox(height: 20,),getButton(),const SizedBox(height: 20,),settings()]),
+            child: Column(children: [
+              createButton(),
+              const SizedBox(
+                height: 20,
+              ),
+              getButton(),
+              const SizedBox(
+                height: 20,
+              ),
+              settings(),
+              const SizedBox(
+                height: 30,
+              ),
+              developer()
+            ]),
           ),
         ));
   }
@@ -32,10 +47,11 @@ class _MainScreenState extends State<MainScreen> {
               borderRadius: BorderRadius.circular(14.0),
             )),
         onPressed: () async {
-           Navigator.pushNamed(context, '/set');
+          Navigator.pushNamed(context, '/set');
         },
         child: const Text('יצירת סיסמה חדשה'));
   }
+
   Widget getButton() {
     return ElevatedButton(
         key: const Key("GetButton"),
@@ -64,5 +80,42 @@ class _MainScreenState extends State<MainScreen> {
           Navigator.pushNamed(context, '/settings');
         },
         child: const Text('הגדרות'));
+  }
+
+  Widget developer() {
+    return Column(children: [
+      const Text("Develop by Oshrey Avaraham"),
+      const SizedBox(height: 10),
+      Row(
+        mainAxisAlignment : MainAxisAlignment.center,
+        children: [
+          InkWell(
+              child: const Text(
+                'Linkdin',
+                style: TextStyle(color: Colors.blue),
+              ),
+              onTap: () async {
+                if (await canLaunchUrlString(
+                    "https://https://www.linkedin.com/in/oshrey-avraham/")) {
+                  launchUrlString(
+                      "https://www.linkedin.com/in/oshrey-avraham/");
+                }
+              }),
+              const SizedBox(width: 10),
+              InkWell(
+              child: const Text(
+                'Github',
+                style: TextStyle(color: Colors.blueGrey),
+              ),
+              onTap: () async {
+                if (await canLaunchUrlString(
+                    "https://github.com/oshrey16")) {
+                  launchUrlString(
+                      "https://github.com/oshrey16");
+                }
+              }),
+        ],
+      )
+    ]);
   }
 }
