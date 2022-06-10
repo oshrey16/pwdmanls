@@ -20,7 +20,7 @@ class _SetPasswordState extends State<SetPassword> {
   TextEditingController emailcontroller = TextEditingController();
   TextEditingController passwordcontroller = TextEditingController();
   TextEditingController urlcontroller = TextEditingController();
-  TextEditingController passwordlen_controller = TextEditingController();
+  TextEditingController passwordlencontroller = TextEditingController();
   String arrow = "↓";
   bool optionsvisible = false;
 
@@ -33,7 +33,7 @@ class _SetPasswordState extends State<SetPassword> {
 
   @override
   void initState() {
-    passwordlen_controller.text = "8";
+    passwordlencontroller.text = "8";
     loadSettings(context);
     super.initState();
   }
@@ -183,7 +183,7 @@ class _SetPasswordState extends State<SetPassword> {
 
   String generatePassword() {
     int length = 8;
-    int? inputlen = int.tryParse(passwordlen_controller.text);
+    int? inputlen = int.tryParse(passwordlencontroller.text);
     if (inputlen != null) {
       length = inputlen;
     }
@@ -398,7 +398,7 @@ class _SetPasswordState extends State<SetPassword> {
           keyboardType: TextInputType.number,
           maxLength: 2,
           textAlignVertical: TextAlignVertical.center,
-          controller: passwordlen_controller,
+          controller: passwordlencontroller,
           autofocus: false,
           decoration: const InputDecoration(
             counterText: "",
