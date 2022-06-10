@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -41,7 +42,7 @@ class _GetPasswordPageState extends State<GetPasswordPage> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15.0),
                         ),
-                        color: Colors.blueGrey.shade300,
+                        color: Colors.blueGrey.shade100,
                         elevation: 14.0,
                         child: Container(
                             padding: const EdgeInsets.all(10.0),
@@ -68,7 +69,8 @@ class _GetPasswordPageState extends State<GetPasswordPage> {
                                       const SizedBox(
                                         height: 5,
                                       ),
-                                      Text("Password: ${pass.password.replaceRange(2, pass.password.length-3, "•••••")}"),
+                                      Text(
+                                          "Password: ${pass.password.replaceRange(2, pass.password.length - 3, "•••••")}"),
                                       if (pass.url != '')
                                         InkWell(
                                             child: Text(
@@ -85,23 +87,45 @@ class _GetPasswordPageState extends State<GetPasswordPage> {
                                             }),
                                     ],
                                   ),
-                                  Container(
+                                  Row(children: [
+                                    Container(
                                       padding: const EdgeInsets.fromLTRB(
                                           20, 0, 10, 0),
-                                      child: IconButton(
-                                        icon: const Icon(
-                                            Icons.report_gmailerrorred),
-                                        color: Colors.white,
-                                        iconSize: 40,
-                                        onPressed: () {
-                                          decryptPass(pass.password).then((value) {
-                                            if(value.isNotEmpty){
-                                            Clipboard.setData(
-                                                ClipboardData(
-                                                    text: value));}
+                                      child: GestureDetector(
+                                        child: const Icon(
+                                          Icons.visibility,
+                                          color: Colors.black,
+                                          size: 40,
+                                        ),
+                                        onLongPress: () {
+                                          decryptPass(pass.password)
+                                              .then((value) {
+                                                setState(() {
+                                                  showDialogMsg(context, "סיסמא", value);
+                                                });
+                                            
                                           });
                                         },
-                                      ))
+                                      ),
+                                    ),
+                                    Container(
+                                        padding: const EdgeInsets.fromLTRB(
+                                            10, 0, 0, 0),
+                                        child: IconButton(
+                                          icon: const Icon(Icons.copy),
+                                          color: Colors.green,
+                                          iconSize: 40,
+                                          onPressed: () {
+                                            decryptPass(pass.password)
+                                                .then((value) {
+                                              if (value.isNotEmpty) {
+                                                Clipboard.setData(
+                                                    ClipboardData(text: value));
+                                              }
+                                            });
+                                          },
+                                        ))
+                                  ]),
                                 ])),
                       ),
                       onTap: () {},
@@ -120,9 +144,9 @@ class _GetPasswordPageState extends State<GetPasswordPage> {
     final database = Provider.of<MyDatabase>(context, listen: false);
     database.getDataSet().then((value) {
       for (var v in value) {
-          PasswordStruct p =
-              PasswordStruct(v.id, v.title, v.email, v.password, v.url);
-          passwords.add(p);
+        PasswordStruct p =
+            PasswordStruct(v.id, v.title, v.email, v.password, v.url);
+        passwords.add(p);
       }
     });
     return 0;
@@ -140,5 +164,28 @@ class _GetPasswordPageState extends State<GetPasswordPage> {
       return dec;
     }
     return "Error";
+  }
+
+  Future showDialogMsg(BuildContext context, String title, String text) async {
+    const oneSec = Duration(seconds:3);
+    Timer.periodic(oneSec, (Timer t) { Navigator.of(context).pop();t.cancel();});
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          alignment: Alignment.center,
+          title: Text(title),
+          actionsAlignment: MainAxisAlignment.center,
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(text),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 }
