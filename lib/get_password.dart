@@ -94,7 +94,7 @@ class _GetPasswordPageState extends State<GetPasswordPage> {
                                         color: Colors.white,
                                         iconSize: 40,
                                         onPressed: () {
-                                          Decrypt(pass.password).then((value) {
+                                          decryptPass(pass.password).then((value) {
                                             if(value.isNotEmpty){
                                             Clipboard.setData(
                                                 ClipboardData(
@@ -108,7 +108,7 @@ class _GetPasswordPageState extends State<GetPasswordPage> {
                     )
                 ]);
               }
-              return Text("2");
+              return const Text("Error");
             }
           },
           future: getDatabase(context),
@@ -120,17 +120,15 @@ class _GetPasswordPageState extends State<GetPasswordPage> {
     final database = Provider.of<MyDatabase>(context, listen: false);
     database.getDataSet().then((value) {
       for (var v in value) {
-        Decrypt(v.password).then((value) {
           PasswordStruct p =
               PasswordStruct(v.id, v.title, v.email, v.password, v.url);
           passwords.add(p);
-        });
       }
     });
     return 0;
   }
 
-  Future<String> Decrypt(String password) async {
+  Future<String> decryptPass(String password) async {
     const storage = FlutterSecureStorage();
     String? value = await storage.read(key: "pkey");
     if (value != null) {
