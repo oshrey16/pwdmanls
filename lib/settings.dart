@@ -25,7 +25,7 @@ class _SettingsPageState extends State<SettingsPage> {
     return Scaffold(
         appBar: AppBar(
           centerTitle: true,
-          title: const Text("יצירת סיסמא"),
+          title: const Text("הגדרות"),
         ),
         body: Center(
             child: Column(children: [
