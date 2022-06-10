@@ -14,9 +14,18 @@ part 'db.g.dart';
 // be represented by a class called "Todo".
 class DataSet extends Table {
   IntColumn get id => integer().autoIncrement()();
-  TextColumn get username => text().named("name")();
+  TextColumn get title => text()();
+  TextColumn get email => text()();
   TextColumn get password => text().withLength(min: 8, max: 32)();
   TextColumn get url => text().nullable()();
+}
+
+@DataClassName('MySettings')
+class Settings extends Table{
+  TextColumn get email => text()();
+
+  @override
+  Set<Column> get primaryKey => {email};
 }
 
 // This will make drift generate a class called "Category" to represent a row in
@@ -30,7 +39,7 @@ class DataSet extends Table {
 
 // this annotation tells drift to prepare a database class that uses both of the
 // tables we just defined. We'll see how to use that database class in a moment.
-@DriftDatabase(tables: [DataSet])
+@DriftDatabase(tables: [DataSet,Settings])
 class MyDatabase extends _$MyDatabase {
   MyDatabase() : super(_openConnection());
 
@@ -49,7 +58,18 @@ class MyDatabase extends _$MyDatabase {
 
   Stream<DataSetData> entryById(int id) {
   return (select(dataSet)..where((t) => t.id.equals(id))).watchSingle();
-}
+  }
+
+  // My Settings
+  Future<int> insertEmailSettings(SettingsCompanion data) async{
+    return await into(settings).insertOnConflictUpdate(data);
+  }
+    Future updateEmailSettings(SettingsCompanion data) async{
+    return await (update(settings)..where((t) => t.email.like('%@%'))).write(SettingsCompanion(email: data.email));
+  }
+  Future<List<MySettings>> getDefaultEmail() async {
+    return await select(settings).get();
+  }
 }
 
 LazyDatabase _openConnection() {

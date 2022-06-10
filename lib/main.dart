@@ -1,9 +1,10 @@
-import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:pwdmanls/db.dart';
+import 'package:pwdmanls/get_password.dart';
 import 'package:pwdmanls/main_screen.dart';
 import 'package:pwdmanls/set_password.dart';
 import 'package:provider/provider.dart';
+import 'package:pwdmanls/settings.dart';
 
 late MyDatabase database;
 void main() {
@@ -30,7 +31,8 @@ class MyApp extends StatelessWidget {
         // When navigating to the "/second" route, build the SecondScreen widget.
         '/second': (context) => const MainScreen(),
         '/set': (context) => const SetPassword(),
-        // '/get': (context) => const MainScreen(),
+        '/get': (context) => const GetPasswordPage(),
+        '/settings': (context) => const SettingsPage(),
       },
       title: 'PwdManls',
       theme: ThemeData(

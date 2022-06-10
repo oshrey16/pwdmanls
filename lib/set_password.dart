@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:drift/drift.dart';
+import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pwdmanls/db.dart';
@@ -13,12 +13,14 @@ class SetPassword extends StatefulWidget {
 }
 
 class _SetPasswordState extends State<SetPassword> {
+  TextEditingController titlecontroller = TextEditingController();
   TextEditingController emailcontroller = TextEditingController();
   TextEditingController passwordcontroller = TextEditingController();
-   TextEditingController urlcontroller = TextEditingController();
+  TextEditingController urlcontroller = TextEditingController();
 
-   @override
+  @override
   void initState() {
+    loadSettings(context);
     super.initState();
   }
 
@@ -30,20 +32,20 @@ class _SetPasswordState extends State<SetPassword> {
           title: const Text("יצירת סיסמא"),
         ),
         body: Center(
-            child: ListView(
-          padding: const EdgeInsets.all(10),
-          children: [
-            loginRegline(emailcontroller, "אימייל"),
-            const SizedBox(height: 10),
-            passwordText(passwordcontroller, 'סיסמה'),
-            const SizedBox(height: 10),
-            urlText(urlcontroller),
-            const SizedBox(height: 10),
-            generateButton(),
-            const SizedBox(height: 10),
-            addPasswordButton(),
-          ],
-        )));
+            child: Column(children: [
+          const SizedBox(height: 40),
+          loginRegline(titlecontroller, "שם האתר"),
+          const SizedBox(height: 10),
+          loginRegline(emailcontroller, "אימייל"),
+          const SizedBox(height: 10),
+          passwordText(passwordcontroller, 'סיסמה'),
+          const SizedBox(height: 10),
+          urlText(urlcontroller),
+          const SizedBox(height: 10),
+          generateButton(),
+          const SizedBox(height: 10),
+          addPasswordButton(),
+        ])));
   }
 
   Widget loginRegline(TextEditingController controller, String title) {
@@ -73,6 +75,7 @@ class _SetPasswordState extends State<SetPassword> {
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: TextField(
+          enabled: false,
           key: const Key("Password"),
           maxLength: 45,
           textAlignVertical: TextAlignVertical.center,
@@ -127,7 +130,7 @@ class _SetPasswordState extends State<SetPassword> {
 
   Widget addPasswordButton() {
     return ElevatedButton(
-      key: const Key("LoginButton"),
+      key: const Key("LoginPasswordButton"),
       style: ElevatedButton.styleFrom(
           minimumSize: Size(MediaQuery.of(context).size.width / 2, 50),
           primary: Colors.green,
@@ -141,7 +144,7 @@ class _SetPasswordState extends State<SetPassword> {
     );
   }
 
-  String generatePassword(){
+  String generatePassword() {
     int length = 8;
     const String letterLowerCase = 'abcdefghijklmnopqrstuvwxyz';
     String letterUpperCase = letterLowerCase.toUpperCase();
@@ -159,9 +162,76 @@ class _SetPasswordState extends State<SetPassword> {
   }
 
   Future savePassword(BuildContext context) async {
-    final database = Provider.of<MyDatabase>(context,listen: false);
-    DataSetCompanion data = DataSetCompanion(username: Value(emailcontroller.text),password: Value(passwordcontroller.text),url : Value(urlcontroller.text));
-    print(database.insertDataSet(data));
+    if (titlecontroller.text == "") {
+      showDialogMsg(context, "שגיאה", "אנא הזן שם לאתר");
+      return;
+    } else {
+      if (emailcontroller.text == "") {
+        showDialogMsg(context, "שגיאה", "אנא הזן אימייל");
+        return;
+      } else {
+        bool emailValid = RegExp(
+                r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+            .hasMatch(emailcontroller.text);
+        if (!emailValid) {
+          showDialogMsg(context, "שגיאה", "אימייל לא תקין");
+          return;
+        } else {
+          if (passwordcontroller.text == "") {
+            showDialogMsg(context, "שגיאה", "אנא הזן סיסמא");
+            return;
+          }
+        }
+      }
+    }
+    final database = Provider.of<MyDatabase>(context, listen: false);
+    DataSetCompanion data = DataSetCompanion(
+      title: drift.Value(titlecontroller.text),
+        email: drift.Value(emailcontroller.text),
+        password: drift.Value(passwordcontroller.text),
+        url: drift.Value(urlcontroller.text));
+    database.insertDataSet(data);
     // database.getDataSet().then((value) => print(value));
+  }
+
+  Future showDialogMsg(BuildContext context, String title, String text) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          alignment: Alignment.center,
+          title: Text(title),
+          actionsAlignment: MainAxisAlignment.center,
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(text),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('אישור'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<int> loadSettings(BuildContext context) async {
+    final database = Provider.of<MyDatabase>(context, listen: false);
+    database.getDefaultEmail().then((value) {
+      if (value.isNotEmpty) {
+        for (var v in value) {
+          emailcontroller.text = v.email;
+        }
+      }
+    });
+    return 0;
   }
 }

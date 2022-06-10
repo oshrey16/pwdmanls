@@ -13,11 +13,11 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
         appBar: AppBar(
           centerTitle: true,
-          title: Text("מסך ראשי"),
+          title: const Text("מסך ראשי"),
         ),
         body: Center(
           child: SingleChildScrollView(
-            child: Column(children: [createButton(),SizedBox(height: 20,),getButton()]),
+            child: Column(children: [createButton(),const SizedBox(height: 20,),getButton(),const SizedBox(height: 20,),settings()]),
           ),
         ));
   }
@@ -45,7 +45,24 @@ class _MainScreenState extends State<MainScreen> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(14.0),
             )),
-        onPressed: () async {},
+        onPressed: () async {
+          Navigator.pushNamed(context, '/get');
+        },
         child: const Text('צפייה בסיסמאות שמורות'));
+  }
+
+  Widget settings() {
+    return ElevatedButton(
+        key: const Key("SettingsButton"),
+        style: ElevatedButton.styleFrom(
+            minimumSize: Size(MediaQuery.of(context).size.width / 2, 50),
+            primary: Colors.green,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14.0),
+            )),
+        onPressed: () async {
+          Navigator.pushNamed(context, '/settings');
+        },
+        child: const Text('הגדרות'));
   }
 }
