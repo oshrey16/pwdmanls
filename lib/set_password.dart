@@ -253,7 +253,6 @@ class _SetPasswordState extends State<SetPassword> {
         database.insertDataSet(data);
       }
     });
-    // database.getDataSet().then((value) => print(value));
   }
 
   Future<String> encrypt(String password) async {
@@ -265,9 +264,6 @@ class _SetPasswordState extends State<SetPassword> {
       final fernet = enc.Fernet(b64key);
       final encrypter = enc.Encrypter(fernet);
       final encrypted = encrypter.encrypt(password);
-      print(encrypted.base64);
-      final dec = encrypter.decrypt(encrypted);
-      print(dec);
       return encrypted.base64;
     }
     return "Error";
