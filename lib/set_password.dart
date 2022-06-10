@@ -1,9 +1,12 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
 import 'package:pwdmanls/db.dart';
+import 'package:encrypt/encrypt.dart' as enc;
 
 class SetPassword extends StatefulWidget {
   const SetPassword({Key? key}) : super(key: key);
@@ -184,14 +187,33 @@ class _SetPasswordState extends State<SetPassword> {
         }
       }
     }
-    final database = Provider.of<MyDatabase>(context, listen: false);
+    encrypt(passwordcontroller.text).then((value) {
+      final database = Provider.of<MyDatabase>(context, listen: false);
     DataSetCompanion data = DataSetCompanion(
       title: drift.Value(titlecontroller.text),
         email: drift.Value(emailcontroller.text),
-        password: drift.Value(passwordcontroller.text),
+        password: drift.Value(value),
         url: drift.Value(urlcontroller.text));
     database.insertDataSet(data);
+    });
     // database.getDataSet().then((value) => print(value));
+  }
+
+  Future<String> encrypt(String password) async{
+    const storage = FlutterSecureStorage();
+    String? value = await storage.read(key: "pkey");
+    if(value != null){
+      final key = enc.Key.fromUtf8(value);
+      final b64key = enc.Key.fromBase64(base64Url.encode(key.bytes));
+      final fernet = enc.Fernet(b64key);
+      final encrypter = enc.Encrypter(fernet);
+      final encrypted = encrypter.encrypt(password);
+      print(encrypted.base64);
+      final dec = encrypter.decrypt(encrypted);
+      print(dec);
+      return encrypted.base64;
+    }
+    return "Error";
   }
 
   Future showDialogMsg(BuildContext context, String title, String text) async {

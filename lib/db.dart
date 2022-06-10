@@ -1,10 +1,15 @@
+import 'dart:convert';
+import 'dart:math';
+
 import 'package:drift/drift.dart';
 // These imports are only needed to open the database
 import 'dart:io';
 
 import 'package:drift/native.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import 'package:encrypt/encrypt.dart';
 
 // assuming that your file is called filename.dart. This will give an error at
 // first, but it's needed for drift to know about the generated code
@@ -16,7 +21,7 @@ class DataSet extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get title => text()();
   TextColumn get email => text()();
-  TextColumn get password => text().withLength(min: 8, max: 32)();
+  TextColumn get password => text()();
   TextColumn get url => text().nullable()();
 }
 
@@ -79,6 +84,16 @@ LazyDatabase _openConnection() {
     // for your app.
     final dbFolder = await getApplicationDocumentsDirectory();
     print(dbFolder);
+    File(p.join(dbFolder.path, 'db.sqlite')).exists().then((value) async { 
+      if(value == false){
+        const _chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+        Random _rnd = Random();
+        String getRandomString(int length) => String.fromCharCodes(Iterable.generate(length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
+        const storage = FlutterSecureStorage();
+        final key1 = getRandomString(32);
+        await storage.write(key: "pkey", value: key1.toString());
+      }
+    }); 
     final file = File(p.join(dbFolder.path, 'db.sqlite'));
     return NativeDatabase(file);
   });

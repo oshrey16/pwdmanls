@@ -231,10 +231,7 @@ class $DataSetTable extends DataSet with TableInfo<$DataSetTable, DataSetData> {
   @override
   late final GeneratedColumn<String?> password = GeneratedColumn<String?>(
       'password', aliasedName, false,
-      additionalChecks:
-          GeneratedColumn.checkTextLength(minTextLength: 8, maxTextLength: 32),
-      type: const StringType(),
-      requiredDuringInsert: true);
+      type: const StringType(), requiredDuringInsert: true);
   final VerificationMeta _urlMeta = const VerificationMeta('url');
   @override
   late final GeneratedColumn<String?> url = GeneratedColumn<String?>(
