@@ -84,7 +84,7 @@ class _MainScreenState extends State<MainScreen> {
 
   Widget developer() {
     return Column(children: [
-      const Text("Develop by Oshrey Avaraham"),
+      const Text("developed by Oshrey Avaraham"),
       const SizedBox(height: 10),
       Row(
         mainAxisAlignment : MainAxisAlignment.center,
