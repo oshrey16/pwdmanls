@@ -20,9 +20,20 @@ class _SetPasswordState extends State<SetPassword> {
   TextEditingController emailcontroller = TextEditingController();
   TextEditingController passwordcontroller = TextEditingController();
   TextEditingController urlcontroller = TextEditingController();
+  TextEditingController passwordlen_controller = TextEditingController();
+  String arrow = "↓";
+  bool optionsvisible = false;
+
+  // #Checkboxes
+  bool capital = true;
+  bool small = true;
+  bool number = true;
+  bool spaciallow = true;
+  bool spacialhard = false;
 
   @override
   void initState() {
+    passwordlen_controller.text = "8";
     loadSettings(context);
     super.initState();
   }
@@ -35,7 +46,8 @@ class _SetPasswordState extends State<SetPassword> {
           title: const Text("יצירת סיסמא"),
         ),
         body: Center(
-            child: Column(children: [
+            child: SingleChildScrollView(
+                child: Column(children: [
           const SizedBox(height: 40),
           loginRegline(titlecontroller, "שם האתר"),
           const SizedBox(height: 10),
@@ -45,10 +57,14 @@ class _SetPasswordState extends State<SetPassword> {
           const SizedBox(height: 10),
           urlText(urlcontroller),
           const SizedBox(height: 10),
+          optionsButton(),
+          const SizedBox(height: 10),
+          hidenOptipns(),
+          const SizedBox(height: 10),
           generateButton(),
           const SizedBox(height: 10),
           addPasswordButton(),
-        ])));
+        ]))));
   }
 
   Widget loginRegline(TextEditingController controller, String title) {
@@ -131,6 +147,24 @@ class _SetPasswordState extends State<SetPassword> {
     );
   }
 
+  Widget optionsButton() {
+    return ElevatedButton(
+      key: const Key("OptionsButton"),
+      style: ElevatedButton.styleFrom(
+          primary: Colors.green,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14.0),
+          )),
+      onPressed: () async {
+        setState(() {
+          arrow == "↓" ? arrow = "↑" : arrow = "↓";
+          optionsvisible = !optionsvisible;
+        });
+      },
+      child: Text("$arrow אפשרויות"),
+    );
+  }
+
   Widget addPasswordButton() {
     return ElevatedButton(
       key: const Key("LoginPasswordButton"),
@@ -149,15 +183,36 @@ class _SetPasswordState extends State<SetPassword> {
 
   String generatePassword() {
     int length = 8;
+    int? inputlen = int.tryParse(passwordlen_controller.text);
+    if (inputlen != null) {
+      length = inputlen;
+    }
     const String letterLowerCase = 'abcdefghijklmnopqrstuvwxyz';
     String letterUpperCase = letterLowerCase.toUpperCase();
     const numbers = '0123456789';
+    // ~`!@#$%^&*()-_+={}[]|\;:"<>,./?
+    const spacialsHard = '~`!@#\$%^&*()-_+={}[]|\\;:"<>,./?';
+    const spacialsSlow = '@!#\$%^&*()+';
 
     String pass = '';
-    pass += letterLowerCase;
-    pass += letterUpperCase;
-    pass += numbers;
-
+    if (small) {
+      pass += letterLowerCase;
+    }
+    if (capital) {
+      pass += letterUpperCase;
+    }
+    if (number) {
+      pass += numbers;
+    }
+    if (spaciallow) {
+      pass += spacialsSlow;
+    }
+    if (spacialhard) {
+      pass += spacialsHard;
+    }
+    if (pass == '') {
+      return '';
+    }
     return List.generate(length, (index) {
       final indexRandom = Random().nextInt(pass.length);
       return pass[indexRandom];
@@ -188,21 +243,23 @@ class _SetPasswordState extends State<SetPassword> {
       }
     }
     encrypt(passwordcontroller.text).then((value) {
-      final database = Provider.of<MyDatabase>(context, listen: false);
-    DataSetCompanion data = DataSetCompanion(
-      title: drift.Value(titlecontroller.text),
-        email: drift.Value(emailcontroller.text),
-        password: drift.Value(value),
-        url: drift.Value(urlcontroller.text));
-    database.insertDataSet(data);
+      if (value != "Error") {
+        final database = Provider.of<MyDatabase>(context, listen: false);
+        DataSetCompanion data = DataSetCompanion(
+            title: drift.Value(titlecontroller.text),
+            email: drift.Value(emailcontroller.text),
+            password: drift.Value(value),
+            url: drift.Value(urlcontroller.text));
+        database.insertDataSet(data);
+      }
     });
     // database.getDataSet().then((value) => print(value));
   }
 
-  Future<String> encrypt(String password) async{
+  Future<String> encrypt(String password) async {
     const storage = FlutterSecureStorage();
     String? value = await storage.read(key: "pkey");
-    if(value != null){
+    if (value != null) {
       final key = enc.Key.fromUtf8(value);
       final b64key = enc.Key.fromBase64(base64Url.encode(key.bytes));
       final fernet = enc.Fernet(b64key);
@@ -255,5 +312,101 @@ class _SetPasswordState extends State<SetPassword> {
       }
     });
     return 0;
+  }
+
+  Widget hidenOptipns() {
+    return Visibility(
+        visible: optionsvisible,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              passwordlen(),
+              const SizedBox(
+                width: 10,
+              ),
+              const Text(":אורך הסיסמא"),
+            ]),
+            SizedBox(width: MediaQuery. of(context). size. width * 0.3, child: CheckboxListTile(
+              title: const Text('אותיות גדולות'),
+              value: capital,
+              onChanged: (value) {
+                setState(() {
+                  capital = !capital;
+                });
+              },
+              controlAffinity: ListTileControlAffinity.leading,
+            ),),
+            SizedBox(width: MediaQuery. of(context). size. width * 0.3, child:CheckboxListTile(
+              title: const Text('אותיות קטנות'),
+              value: small,
+              onChanged: (value) {
+                setState(() {
+                  small = !small;
+                });
+              },
+              controlAffinity: ListTileControlAffinity.leading,
+            )),
+            SizedBox(width: MediaQuery. of(context). size. width * 0.3, child:CheckboxListTile(
+              title: const Text('מספרים'),
+              value: number,
+              onChanged: (value) {
+                setState(() {
+                  number = !number;
+                });
+              },
+              controlAffinity: ListTileControlAffinity.leading,
+            )),
+            SizedBox(width: MediaQuery. of(context). size. width * 0.3, child:CheckboxListTile(
+              title: const Text('תווים מיוחדים - קל'),
+              value: spaciallow,
+              onChanged: (value) {
+                setState(() {
+                  spaciallow = !spaciallow;
+                  if (spaciallow) {
+                    spacialhard = false;
+                  }
+                });
+              },
+              controlAffinity: ListTileControlAffinity.leading,
+            )),
+            SizedBox(width: MediaQuery. of(context). size. width * 0.3, child:CheckboxListTile(
+              title: const Text('תווים מיוחדים - קשה'),
+              value: spacialhard,
+              onChanged: (value) {
+                setState(() {
+                  spacialhard = !spacialhard;
+                  if (spacialhard) {
+                    spaciallow = false;
+                  }
+                });
+              },
+              controlAffinity: ListTileControlAffinity.leading,
+            )),
+          ],
+        ));
+  }
+
+  Widget passwordlen() {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width * 0.2,
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: TextField(
+          key: const Key("PasswordLen"),
+          keyboardType: TextInputType.number,
+          maxLength: 2,
+          textAlignVertical: TextAlignVertical.center,
+          controller: passwordlen_controller,
+          autofocus: false,
+          decoration: const InputDecoration(
+            counterText: "",
+            border: OutlineInputBorder(),
+            labelText: "אורך",
+          ),
+        ),
+      ),
+    );
   }
 }
