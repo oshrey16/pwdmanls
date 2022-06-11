@@ -65,12 +65,12 @@ class _GetPasswordPageState extends State<GetPasswordPage> {
                                       const SizedBox(
                                         height: 5,
                                       ),
-                                      Text("Email: ${pass.email}"),
+                                      Text("שם משתמש: ${pass.email}"),
                                       const SizedBox(
                                         height: 5,
                                       ),
                                       Text(
-                                          "Password: ${pass.password.replaceRange(2, pass.password.length - 3, "•••••")}"),
+                                          "סיסמא: ${pass.password.replaceRange(2, pass.password.length - 3, "•••••")}"),
                                       if (pass.url != '')
                                         InkWell(
                                             child: Text(

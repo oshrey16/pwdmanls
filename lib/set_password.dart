@@ -51,7 +51,7 @@ class _SetPasswordState extends State<SetPassword> {
           const SizedBox(height: 40),
           loginRegline(titlecontroller, "שם האתר"),
           const SizedBox(height: 10),
-          loginRegline(emailcontroller, "אימייל"),
+          loginRegline(emailcontroller, "שם משתמש"),
           const SizedBox(height: 10),
           passwordText(passwordcontroller, 'סיסמה'),
           const SizedBox(height: 10),
@@ -225,22 +225,24 @@ class _SetPasswordState extends State<SetPassword> {
       return;
     } else {
       if (emailcontroller.text == "") {
-        showDialogMsg(context, "שגיאה", "אנא הזן אימייל");
+        showDialogMsg(context, "שגיאה", "אנא הזן שם משתמש");
         return;
-      } else {
-        bool emailValid = RegExp(
-                r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
-            .hasMatch(emailcontroller.text);
-        if (!emailValid) {
-          showDialogMsg(context, "שגיאה", "אימייל לא תקין");
-          return;
-        } else {
+      } 
+      // else {
+      //   bool emailValid = RegExp(
+      //           r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+      //       .hasMatch(emailcontroller.text);
+      //   if (!emailValid) {
+      //     showDialogMsg(context, "שגיאה", "אימייל לא תקין");
+      //     return;
+        // } 
+        else {
           if (passwordcontroller.text == "") {
             showDialogMsg(context, "שגיאה", "אנא הזן סיסמא");
             return;
           }
         }
-      }
+      // }
     }
     encrypt(passwordcontroller.text).then((value) {
       if (value != "Error") {
@@ -250,7 +252,7 @@ class _SetPasswordState extends State<SetPassword> {
             email: drift.Value(emailcontroller.text),
             password: drift.Value(value),
             url: drift.Value(urlcontroller.text));
-        database.insertDataSet(data);
+        database.insertDataSet(data).then((value) => showDialogMsg(context, "אישור", "הרשומה נוספה בהצלחה"));
       }
     });
   }

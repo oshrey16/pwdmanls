@@ -96,6 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
               Navigator.pushNamed(context, '/second');
             }
             else{
+              if(value == -1)
               showDialogMsg(context,"שגיאה","סיסמא לא נכונה");
             }
           });
@@ -136,10 +137,12 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<int> loginFuture(BuildContext context) async {
     const storage = FlutterSecureStorage();
+    // await storage.delete(key: "pass");
     String? value = await storage.read(key: "pass");
+    print(value);
     if (value == null) {
-      showDialogRegister(context, storage).then((value) {
-        return 0;
+      return showDialogRegister(context, storage).then((value) {
+        return 1;
       });
     }
     if (value == _passwordController.text) {
